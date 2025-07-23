@@ -194,7 +194,7 @@ const DocumentFormModal = ({
             c.toUpperCase()
           ),
           INPUT_TYPE: "text",
-          REQUIRED: true,
+          REQUIRED: false,
           VALUE:
             !selectedDocument ||
             selectedDocument.REF_SEQ_NO === undefined ||
@@ -430,12 +430,12 @@ const DocumentFormModal = ({
           aria-hidden="true"
           style={{ isolation: "isolate" }}
         />
-        <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
-          <div className="bg-white shadow-xl dark:bg-slate-950 text-gray-900 dark:text-gray-100 p-6 rounded-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center p-2 z-50">
+          <div className="bg-white shadow-xl dark:bg-slate-950 text-gray-900 dark:text-gray-100 p-4 rounded-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between gap-2">
               <h3 className="text-sm font-semibold">
                 Reference ID:
-                <span className="ml-2 px-2 py-0 bg-blue-100 text-blue-800 rounded-full text-sm">
+                <span className="ml-2 px-1 py-0 bg-blue-100 text-blue-800 rounded-full text-xs">
                   {formData.REF_SEQ_NO === -1 ? "(New)" : formData.REF_SEQ_NO}
                 </span>
               </h3>
@@ -447,18 +447,18 @@ const DocumentFormModal = ({
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <Separator className="my-4" />
+            <Separator className="my-2" />
             <form
               onSubmit={handleSubmit}
               id="document-form"
               name="document-form"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
                 {/* Left Side - Document Form and Others Details */}
                 <div className="col-span-3 lg:col-span-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {/* Document Number */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
                         <Hash className="h-4 w-4 text-gray-600" />
                         <Label htmlFor="DOCUMENT_NO">Document Ref No</Label>
@@ -482,7 +482,7 @@ const DocumentFormModal = ({
                       )}
                     </div>
                     {/* Document Name */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
                         <FileText className="h-4 w-4 text-gray-600" />
                         <Label htmlFor="DOCUMENT_DESCRIPTION">
@@ -505,7 +505,7 @@ const DocumentFormModal = ({
                       )}
                     </div>
                     {/* Related To */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
                         <Link className="h-4 w-4 text-gray-600" />
                         <Label htmlFor="DOC_RELATED_TO">Related To</Label>
@@ -515,7 +515,7 @@ const DocumentFormModal = ({
                         value={formData.DOC_RELATED_TO}
                         onChange={handleChange}
                         disabled={isReadOnly}
-                        className="w-full rounded-md border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400 dark:focus:border-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:disabled:text-gray-400"
+                        className="w-full rounded-md border border-gray-300 p-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400 dark:focus:border-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:disabled:text-gray-400"
                       >
                         <option
                           value=""
@@ -556,19 +556,19 @@ const DocumentFormModal = ({
                       )}
                     </div>
                     {/* Related Category */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
                         <Folder className="h-4 w-4 text-gray-600" />
-                        <label htmlFor="DOC_RELATED_CATEGORY">
+                        <Label htmlFor="DOC_RELATED_CATEGORY">
                           Related Category
-                        </label>
+                        </Label>
                       </div>
                       <select
                         name="DOC_RELATED_CATEGORY"
                         value={formData.DOC_RELATED_CATEGORY}
                         onChange={handleCategoryChange}
                         disabled={isReadOnly}
-                        className="w-full rounded-md border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400 dark:focus:border-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:disabled:text-gray-400"
+                        className="w-full rounded-md border border-gray-300 p-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-400 dark:focus:border-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:disabled:text-gray-400"
                       >
                         <option
                           value=""
@@ -604,7 +604,7 @@ const DocumentFormModal = ({
                       )}
                     </div>
                     {/* Expiry Date */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
                         <CalendarDays className="h-4 w-4 text-gray-600" />
                         <Label htmlFor="EXPIRY_DATE">Expiry Date</Label>
@@ -659,7 +659,7 @@ const DocumentFormModal = ({
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm">
                         <MessageSquare className="h-4 w-4 text-gray-600" />
-                        <label htmlFor="COMMENTS">Remarks</label>
+                        <Label htmlFor="COMMENTS">Remarks</Label>
                       </div>
                       <Textarea
                         name="COMMENTS"
@@ -671,11 +671,11 @@ const DocumentFormModal = ({
                       />
                     </div>
                     {/* Others Details Section Moved to Left Side */}
-                    <div className="col-span-2 space-y-4">
-                      <h2 className="text-lg font-medium mb-2">
+                    <div className="col-span-2 space-y-1 bg-slate-200 rounded-lg p-2">
+                      <h2 className="text-sm font-medium mb-2">
                         Others Details:
                       </h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="flex items-center justify-between gap-3 w-full">
                           <div className="flex items-center gap-1 text-gray-500">
                             <UserRound className="h-4 w-4" />
@@ -694,7 +694,9 @@ const DocumentFormModal = ({
                               Document Received From
                             </label>
                           </div>
-                          <p className="text-sm font-medium">{formData.DOC_SOURCE_FROM}</p>
+                          <p className="text-sm font-medium">
+                            {formData.DOC_SOURCE_FROM}
+                          </p>
                         </div>
                         <div className="flex items-center justify-between gap-3 w-full">
                           <div className="flex items-center gap-1 text-gray-500">
@@ -756,8 +758,8 @@ const DocumentFormModal = ({
                   )}
                 </div>
                 {/* Right Side - Dynamic Fields */}
-                <div className="col-span-3 lg:col-span-1 bg-slate-200 transition-colors dark:bg-slate-900 p-4 rounded-lg space-y-4">
-                  <h2 className="text-lg font-medium mb-2">Dynamic Fields:</h2>
+                <div className="col-span-3 lg:col-span-1 bg-slate-200 transition-colors dark:bg-slate-900 p-2 rounded-lg space-y-2">
+                  <h2 className="text-sm font-medium mb-2">Dynamic Fields:</h2>
                   {isLoadingDynamicFields ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : dynamicFields.length > 0 ? (
