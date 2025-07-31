@@ -1,4 +1,3 @@
-//app/actions.js
 import axios from "axios";
 import { callSoapService } from "@/api/callSoapService";
 import { convertDataModelToStringData } from "@/utils/dataModelConverter";
@@ -21,12 +20,10 @@ export const addLocalQuestion = (questionData) => ({
   payload: questionData,
 });
 
-export const setAnalysisSummary = (summary) => {
-  return {
-    type: "SET_ANALYSIS_SUMMARY",
-    payload: summary,
-  };
-};
+export const setAnalysisSummary = (summary) => ({
+  type: "SET_ANALYSIS_SUMMARY",
+  payload: summary,
+});
 
 export const appendAnalysisSummary = (summary) => ({
   type: "APPEND_ANALYSIS_SUMMARY",
@@ -225,7 +222,6 @@ export const createDocument =
 
     dispatch(setLoading(true));
     try {
-      // Create SYNM_DMS_MASTER record
       const documentData = {
         REF_SEQ_NO: -1,
         DOC_RELATED_CATEGORY: selectedType,
@@ -250,7 +246,6 @@ export const createDocument =
       const message = masterResponse;
       const refSeqNo = message.match(/'(\d+)'/)[1];
 
-      // Save to SYNM_DMS_DOC_CATG_QA
       const allQuestions = [...analysisSummary, ...localQuestions];
       for (const item of allQuestions) {
         const questionData = {
@@ -273,7 +268,6 @@ export const createDocument =
       }
 
       let serialCounter = 1;
-      // Save to SYNM_DMS_DOC_VALUES
       for (const item of allQuestions) {
         const answerData = {
           REF_SEQ_NO: refSeqNo,
@@ -294,7 +288,7 @@ export const createDocument =
 
         await callSoapService(clientURL, "DataModel_SaveData", answerPayload);
       }
-      // Fetch SYNM_DMS_MASTER with refSeqNo
+
       const fetchedDocument = await dispatch(
         fetchDocsMaster(refSeqNo, clientURL)
       );
@@ -320,7 +314,7 @@ export const fetchDocsMaster = (refSeqNo, clientURL) => async (dispatch) => {
     });
 
     dispatch(setFetchedDocument(response[0] || null));
-    return response[0] || null; // Return the fetched document
+    return response[0] || null;
   } catch (error) {
     dispatch(setError("Failed to fetch docs master"));
     console.error("Error fetching docs master:", error);
@@ -332,3 +326,38 @@ export const setFile = (file) => ({
   type: "SET_FILE",
   payload: file,
 });
+
+export const generateAnalysisSummary =
+  (questions, mode, file, clientURL) => async (dispatch) => {
+    dispatch(setLoading(true));
+    try {
+      const formData = new FormData();
+      formData.append("File", file);
+      formData.append("Question", `${questions.join(", ")}`);
+
+      const res = await axios.post(API_URL, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const answerLines = res.data
+        .split("\n")
+        .filter((line) => line.trim() !== "")
+        .map((line) => line.replace(/^- /, "").trim());
+
+      const summary = answerLines.map((line, index) => {
+        const question = questions[index];
+        return { text: line, label: question, question };
+      });
+
+      if (mode === "append") {
+        dispatch(appendAnalysisSummary(summary));
+      } else {
+        dispatch(setAnalysisSummary(summary));
+      }
+    } catch (error) {
+      dispatch(setError("Failed to generate analysis summary"));
+      console.error("Error generating analysis summary:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };

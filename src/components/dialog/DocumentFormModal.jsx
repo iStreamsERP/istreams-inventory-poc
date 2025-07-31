@@ -121,8 +121,6 @@ const DocumentFormModal = ({
     }
   };
 
-  console.log(selectedDocument);
-
   // Fetch existing documents
   useEffect(() => {
     fetchExistingDocument();

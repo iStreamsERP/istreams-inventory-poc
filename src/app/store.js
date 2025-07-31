@@ -1,4 +1,3 @@
-//app/store.js
 import { createStore, applyMiddleware } from "redux";
 import { thunk } from "redux-thunk";
 
@@ -29,7 +28,6 @@ const reducer = (state = initialState, action) => {
     case "SET_ANALYSIS_SUMMARY":
       return { ...state, analysisSummary: action.payload };
     case "APPEND_ANALYSIS_SUMMARY":
-      // Ensure no duplicates by filtering out existing questions
       const existingQuestions = new Set(
         state.analysisSummary.map((item) => item.question)
       );
