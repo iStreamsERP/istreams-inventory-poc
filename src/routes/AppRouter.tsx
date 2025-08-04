@@ -1,32 +1,19 @@
-import { DefaultLayout, UploadLayout } from "@/layouts";
+import { DefaultLayout } from "@/layouts";
 import {
-  CategoryAccessRightsPage,
-  CategoryMasterPage,
-  CategoryViewPage,
   DashboardPage,
-  DocumentListPage,
-  DocumentTreePage,
-  DocumentViewPage,
   ForgetPasswordPage,
   LoginFormPage,
+  MaterialIssueNote,
+  MaterialMaster,
+  MaterialRequisition,
   NotFoundPage,
-  RoleAccessRightsPage,
+  RfqPage,
   SignUpPage,
-  TaskPage,
-  TeamsPage,
-  TimeSheetPage,
-  UploadDocumentPage,
-  UserAccessRightsPage,
-  UserListPage,
-  UserPreferences,
-  UserRolePage,
-  TaskViewPage,
 } from "@/pages";
 import { createBrowserRouter } from "react-router-dom";
-import type { RouteObject } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
-const router: RouteObject[] = createBrowserRouter([
+const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginFormPage />,
@@ -40,41 +27,17 @@ const router: RouteObject[] = createBrowserRouter([
     element: <ForgetPasswordPage />,
   },
   {
-    path: "/upload-document",
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: <UploadLayout />,
-        children: [{ index: true, element: <UploadDocumentPage /> }],
-      },
-    ],
-  },
-  {
     path: "/",
     element: <ProtectedRoute />,
     children: [
       {
         element: <DefaultLayout />,
         children: [
-          { index: true, element: <DashboardPage /> }, // Restored DashboardPage as index
-          { path: "teams", element: <TeamsPage /> },
-          { path: "category-view", element: <CategoryViewPage /> },
-          { path: "document-tree-view", element: <DocumentTreePage /> },
-          { path: "document-list", element: <DocumentListPage /> },
-          { path: "document-view", element: <DocumentViewPage /> },
-          { path: "task-view", element: <TaskViewPage /> },
-          { path: "time-sheet", element: <TimeSheetPage /> },
-          { path: "account-settings", element: <UserPreferences /> },
-          { path: "task", element: <TaskPage /> },
-          { path: "users", element: <UserListPage /> },
-          { path: "user-role", element: <UserRolePage /> },
-          {
-            path: "category-access-rights",
-            element: <CategoryAccessRightsPage />,
-          }, // Fixed typo
-          { path: "user-access-rights", element: <UserAccessRightsPage /> }, // Fixed typo
-          { path: "role-access-rights", element: <RoleAccessRightsPage /> }, // Fixed typo
-          { path: "category-master", element: <CategoryMasterPage /> },
+          { index: true, element: <DashboardPage /> },
+          { path: "/material-master", element: <MaterialMaster /> },
+          { path: "/material-requisition", element: <MaterialRequisition /> },
+          { path: "/material-issue-note", element: <MaterialIssueNote /> },
+          { path: "/fqPage", element: <RfqPage /> },
         ],
       },
     ],

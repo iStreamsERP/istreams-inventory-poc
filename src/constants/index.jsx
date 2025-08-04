@@ -23,110 +23,58 @@ export const getNavbarLinks = (isAdmin) => [
         icon: Home,
         path: "/",
       },
-      ...(isAdmin
-        ? [
-            {
-              label: "Teams",
-              icon: Users,
-              path: "/teams",
-            },
-          ]
-        : []),
-      {
-        label: "Categories",
-        icon: LayoutGrid,
-        path: "/category-view",
-      },
-      {
-        label: "Document Tree View",
-        icon: LayoutGrid,
-        path: "/document-tree-view",
-      },
     ],
   },
   {
-    title: "Documents",
+    title: "Forms",
     links: [
       {
-        label: "Upload Document",
-        icon: UploadCloud,
-        path: "/upload-document",
+        label: "Inventory Management",
+        icon: "ShieldUser",
+        children: [
+          {
+            label: "Material Master",
+            icon: "Home",
+            path: "/material-master",
+          },
+          {
+            label: "Material Requisition",
+            icon: "Home",
+            path: "/material-requisition",
+          },
+          {
+            label: "Material Issue Note",
+            icon: "Home",
+            path: "/material-issue-note",
+          },
+        ],
       },
       {
-        label: "Document List",
-        icon: FileText,
-        path: "/document-list",
-      },
-      {
-        label: "Document View",
-        icon: FileSearch,
-        path: "/document-view",
+        label: "Procurement Management",
+        icon: "ShieldUser",
+        children: [
+          {
+            label: "RFQ Rate Viewer",
+            icon: "Home",
+            path: "/material-master",
+          },
+          {
+            label: "RFQ List",
+            icon: "Home",
+            path: "/material-requisition",
+          },
+          {
+            label: "RFQ short list process",
+            icon: "Home",
+            path: "/purchase-order",
+          },
+          {
+            label: "RFQ comparison",
+            icon: "Home",
+            path: "/purchase-requisition",
+          },
+        ],
       },
     ],
   },
-  {
-    title: "Tasks",
-    links: [
-      {
-        label: "Task View",
-        icon: FileCheck2,
-        path: "/task-view",
-      },
-      {
-        label: "Time Sheet",
-        icon: CalendarClock,
-        path: "/time-sheet",
-      },
-      {
-        label: "Task management",
-        icon: LayoutDashboard,
-        path: "/task",
-      },
-    ],
-  },
-  ...(isAdmin
-    ? [
-        {
-          title: "Access Control",
-          links: [
-            {
-              label: "User Administration",
-              icon: ShieldUser,
-              children: [
-                {
-                  label: "Users",
-                  icon: LibraryBig,
-                  path: "/users",
-                },
-                {
-                  label: "User Role",
-                  icon: LibraryBig,
-                  path: "/user-role",
-                },
-                {
-                  label: "User Access Rights",
-                  icon: LibraryBig,
-                  path: "/user-access-rights",
-                },
-                {
-                  label: "Role Access Rights",
-                  icon: LibraryBig,
-                  path: "/role-access-rights",
-                },
-                {
-                  label: "Category Access Rights",
-                  icon: LibraryBig,
-                  path: "/category-access-rights",
-                },
-              ],
-            },
-            {
-              label: "Category Master",
-              icon: LibraryBig,
-              path: "/category-master",
-            },
-          ],
-        },
-      ]
-    : []),
 ];

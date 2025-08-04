@@ -1,21 +1,11 @@
 export { ForgetPasswordPage } from "./auth/ForgetPasswordPage";
 export { LoginFormPage } from "./auth/LoginFormPage";
 export { SignUpPage } from "./auth/SignUpPage";
-export { CategoryAccessRightsPage } from "./CategoryAccessRightsPage";
-export { CategoryMasterPage } from "./CategoryMasterPage";
-export { CategoryViewPage } from "./CategoryViewPage";
+
 export { DashboardPage } from "./DashboardPage";
-export { DocumentViewPage } from "./DocumentViewPage";
+export { MaterialMaster } from "./MaterialMaster";
+export { MaterialRequisition } from "./MaterialRequisition";
+export { MaterialIssueNote } from "./MaterialIssueNote";
+export { RfqPage } from "./RfqPage";
+
 export { NotFoundPage } from "./NotFoundPage";
-export { RoleAccessRightsPage } from "./RoleAccessRightsPage";
-export { DocumentListPage } from "./DocumentListPage";
-export { TaskPage } from "./TaskPage";
-export { TaskViewPage } from "./TaskViewPage";
-export { TeamsPage } from "./TeamsPage";
-export { TimeSheetPage } from "./TimeSheetPage";
-export { UploadDocumentPage } from "./UploadDocumentPage";
-export { UserAccessRightsPage } from "./UserAccessRightsPage";
-export { UserListPage } from "./UserListPage";
-export { UserPreferences } from "./UserPreferences";
-export { DocumentTreePage } from "./DocumentTreePage";
-export { UserRolePage } from "./UserRolePage";

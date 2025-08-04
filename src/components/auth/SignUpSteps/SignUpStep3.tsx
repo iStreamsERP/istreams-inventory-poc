@@ -1,22 +1,33 @@
 // src/components/SignUpStep3.tsx
-import { callPublicSoapService } from '@/api/callSoapService';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { sendEmail } from '@/services/emailService';
-import type { OptionalVerificationState, SignUpFormValues, SignUpStep3Props } from '@/types/signup';
-import { generateOTP } from '@/utils/generateOTP';
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
-import { ErrorMessage, Field, Form, Formik } from 'formik';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
-import { Link } from 'react-router-dom';
-import * as Yup from 'yup';
-import { auth } from '../../../../firebase.config';
-import { OptionalVerificationModal } from './OptionalVerificationModal';
+import { callPublicSoapService } from "@/api/callSoapService";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { sendEmail } from "@/services/emailService";
+import type {
+  OptionalVerificationState,
+  SignUpFormValues,
+  SignUpStep3Props,
+} from "@/types/signup";
+import { generateOTP } from "@/utils/generateOTP";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+import { Link } from "react-router-dom";
+import * as Yup from "yup";
+import { auth } from "../../../../firebase.config";
+import { OptionalVerificationModal } from "./OptionalVerificationModal";
 
 const PUBLIC_SERVICE_URL = import.meta.env.VITE_SOAP_ENDPOINT;
 
@@ -31,28 +42,33 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
   onOptionalVerify,
 }) => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [optionalVerification, setOptionalVerification] = useState<OptionalVerificationState>({
-    open: false,
-    contact: '',
-    isEmail: !isEmailPrimary,
-    otp: '',
-    otpSent: false,
-    otpTimer: 0,
-    loading: false,
-    error: '',
-    confirmationResult: null,
-    storedOtp: '',
-    verifiedEmail: '',
-    verifiedPhone: '',
-  });
+  const [optionalVerification, setOptionalVerification] =
+    useState<OptionalVerificationState>({
+      open: false,
+      contact: "",
+      isEmail: !isEmailPrimary,
+      otp: "",
+      otpSent: false,
+      otpTimer: 0,
+      loading: false,
+      error: "",
+      confirmationResult: null,
+      storedOtp: "",
+      verifiedEmail: "",
+      verifiedPhone: "",
+    });
   const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
 
   const setupRecaptcha = (): RecaptchaVerifier => {
     if (!recaptchaRef.current) {
-      recaptchaRef.current = new RecaptchaVerifier(auth, 'recaptcha-container-optional', {
-        size: 'invisible',
-        callback: () => console.log('Recaptcha solved'),
-      });
+      recaptchaRef.current = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container-optional",
+        {
+          size: "invisible",
+          callback: () => console.log("Recaptcha solved"),
+        }
+      );
       recaptchaRef.current.render().catch(console.error);
     }
     return recaptchaRef.current;
@@ -62,43 +78,54 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
     let timer: NodeJS.Timeout | undefined;
     if (optionalVerification.otpTimer > 0) {
       timer = setTimeout(
-        () => setOptionalVerification((prev) => ({ ...prev, otpTimer: prev.otpTimer - 1 })),
+        () =>
+          setOptionalVerification((prev) => ({
+            ...prev,
+            otpTimer: prev.otpTimer - 1,
+          })),
         1000
       );
     }
     return () => clearTimeout(timer);
   }, [optionalVerification.otpTimer]);
 
-  const handleOptionalVerification = async (contact: string, isEmail: boolean = !isEmailPrimary): Promise<void> => {
+  const handleOptionalVerification = async (
+    contact: string,
+    isEmail: boolean = !isEmailPrimary
+  ): Promise<void> => {
     setOptionalVerification((prev) => ({
       ...prev,
       contact,
       isEmail,
       loading: true,
-      error: '',
+      error: "",
       otpSent: false,
-      otp: '',
+      otp: "",
     }));
 
     try {
-      const methodName = isEmail ? 'Public_User_ValidateEmailAddress' : 'Public_User_ValidateMobileNo';
-      const response = await callPublicSoapService<string>(
+      const methodName = isEmail
+        ? "Public_User_ValidateEmailAddress"
+        : "Public_User_ValidateMobileNo";
+      const response = await callPublicSoapService(
         PUBLIC_SERVICE_URL,
         methodName,
         isEmail ? { emailAddress: contact } : { mobileNo: contact }
       );
 
-      if (response === 'Already Exists') {
-        throw new Error(`This ${isEmail ? 'email' : 'phone'} is already registered`);
+      if (response === "Already Exists") {
+        throw new Error(
+          `This ${isEmail ? "email" : "phone"} is already registered`
+        );
       }
 
       if (isEmail) {
         const otp = generateOTP(6);
         await sendEmail({
           toEmail: contact,
-          subject: 'Your iStreams ERP Verification Code',
+          subject: "Your iStreams ERP Verification Code",
           body: `Your OTP is: ${otp}`,
-          displayName: 'iStreams ERP',
+          displayName: "iStreams ERP",
         });
 
         setOptionalVerification((prev) => ({
@@ -110,7 +137,11 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
         }));
       } else {
         const appVerifier = setupRecaptcha();
-        const confirmation = await signInWithPhoneNumber(auth, contact, appVerifier);
+        const confirmation = await signInWithPhoneNumber(
+          auth,
+          contact,
+          appVerifier
+        );
         setOptionalVerification((prev) => ({
           ...prev,
           confirmationResult: confirmation,
@@ -119,35 +150,39 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
           loading: false,
         }));
       }
-    } catch (error: any) {
-      console.error('Optional verification error:', error);
+    } catch (error) {
+      console.error("Optional verification error:", error);
       setOptionalVerification((prev) => ({
         ...prev,
-        error: error.message || 'Verification failed. Try again.',
+        error: error?.message || "Verification failed. Try again.",
         loading: false,
       }));
     }
   };
 
   const verifyOptionalOtp = async (): Promise<void> => {
-    setOptionalVerification((prev) => ({ ...prev, loading: true, error: '' }));
+    setOptionalVerification((prev) => ({ ...prev, loading: true, error: "" }));
 
     try {
-      const { isEmail, otp, storedOtp, confirmationResult } = optionalVerification;
+      const { isEmail, otp, storedOtp, confirmationResult } =
+        optionalVerification;
 
       if (isEmail) {
-        if (otp !== storedOtp) throw new Error('Invalid OTP');
+        if (otp !== storedOtp) throw new Error("Invalid OTP");
         await onOptionalVerify(optionalVerification.contact, true);
       } else {
-        if (!confirmationResult) throw new Error('No confirmation result available');
+        if (!confirmationResult)
+          throw new Error("No confirmation result available");
         await confirmationResult.confirm(otp);
         await onOptionalVerify(optionalVerification.contact, false);
       }
       closeModal();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.log("Optional verification error:", error);
+
       setOptionalVerification((prev) => ({
         ...prev,
-        error: 'Invalid verification code. Please try again.',
+        error: "Invalid verification code. Please try again.",
       }));
     } finally {
       setOptionalVerification((prev) => ({ ...prev, loading: false }));
@@ -158,45 +193,50 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
     setOptionalVerification((prev) => ({
       ...prev,
       open: false,
-      otp: '',
-      error: '',
+      otp: "",
+      error: "",
     }));
   };
 
   const SignupSchema = Yup.object().shape({
-    FULL_NAME: Yup.string().required('Full Name is required'),
+    FULL_NAME: Yup.string().required("Full Name is required"),
     LOGIN_EMAIL_ADDRESS: Yup.string()
-      .email('Invalid email')
-      .test('verified-email', 'Email must be verified', function (value) {
+      .email("Invalid email")
+      .test("verified-email", "Email must be verified", function (value) {
         if (isEmailPrimary) return true;
         if (!value) return true;
         return emailVerified;
       }),
-    LOGIN_MOBILE_NO: Yup.string()
-      .test('verified-phone', 'Phone must be verified', function (value) {
+    LOGIN_MOBILE_NO: Yup.string().test(
+      "verified-phone",
+      "Phone must be verified",
+      function (value) {
         if (!isEmailPrimary) return true;
         if (!value) return true;
         return phoneVerified;
-      }),
-    userType: Yup.string().required('Account type is required'),
-    COMPANY_NAME: Yup.string().when('userType', {
-      is: 'business',
-      then: (schema) => schema.required('Company name is required'),
+      }
+    ),
+    userType: Yup.string().required("Account type is required"),
+    COMPANY_NAME: Yup.string().when("userType", {
+      is: "business",
+      then: (schema) => schema.required("Company name is required"),
     }),
-    GST_VAT_NO: Yup.string().when('userType', {
-      is: 'business',
-      then: (schema) => schema.required('GST number is required'),
+    GST_VAT_NO: Yup.string().when("userType", {
+      is: "business",
+      then: (schema) => schema.required("GST number is required"),
     }),
-    FULL_ADDRESS: Yup.string().required('Address is required'),
-    CITY: Yup.string().required('City is required'),
-    STATE_NAME: Yup.string().required('State is required'),
-    COUNTRY: Yup.string().required('Country is required'),
-    PIN_CODE: Yup.string().required('Pin code is required'),
-    LOGIN_PASSWORD: Yup.string().min(8, 'Minimum 8 characters').required('Password is required'),
+    FULL_ADDRESS: Yup.string().required("Address is required"),
+    CITY: Yup.string().required("City is required"),
+    STATE_NAME: Yup.string().required("State is required"),
+    COUNTRY: Yup.string().required("Country is required"),
+    PIN_CODE: Yup.string().required("Pin code is required"),
+    LOGIN_PASSWORD: Yup.string()
+      .min(8, "Minimum 8 characters")
+      .required("Password is required"),
     confirmPassword: Yup.string()
-      .oneOf([Yup.ref('LOGIN_PASSWORD')], 'Passwords must match')
-      .required('Confirm your password'),
-    acknowledged: Yup.boolean().oneOf([true], 'You must agree to terms'),
+      .oneOf([Yup.ref("LOGIN_PASSWORD")], "Passwords must match")
+      .required("Confirm your password"),
+    acknowledged: Yup.boolean().oneOf([true], "You must agree to terms"),
   });
 
   return (
@@ -221,27 +261,35 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                 onChange={handleChange}
                 className="mt-1"
               />
-              <ErrorMessage name="FULL_NAME" component="div" className="mt-1 text-sm text-red-500" />
+              <ErrorMessage
+                name="FULL_NAME"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
             </div>
 
             <div className="flex flex-col">
-              <Label>{isEmailPrimary ? 'Email' : 'Phone'}</Label>
+              <Label>{isEmailPrimary ? "Email" : "Phone"}</Label>
               {isEmailPrimary ? (
-                <Input value={values.LOGIN_EMAIL_ADDRESS} disabled className="mt-1 bg-gray-100" />
+                <Input
+                  value={values.LOGIN_EMAIL_ADDRESS}
+                  disabled
+                  className="mt-1 bg-gray-100"
+                />
               ) : (
                 <PhoneInput
                   country="in"
                   value={values.LOGIN_MOBILE_NO}
                   disabled
-                  inputStyle={{ width: '100%', backgroundColor: '#f3f4f6' }}
-                  containerStyle={{ marginTop: '0.25rem' }}
+                  inputStyle={{ width: "100%", backgroundColor: "#f3f4f6" }}
+                  containerStyle={{ marginTop: "0.25rem" }}
                 />
               )}
               <div className="mt-1 text-sm text-green-600">✓ Verified</div>
             </div>
 
             <div className="flex flex-col">
-              <Label>{!isEmailPrimary ? 'Email' : 'Phone'}</Label>
+              <Label>{!isEmailPrimary ? "Email" : "Phone"}</Label>
               <div className="flex gap-2">
                 {!isEmailPrimary ? (
                   <Input
@@ -254,24 +302,33 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                 ) : (
                   <PhoneInput
                     country="in"
-                    value={values.LOGIN_MOBILE_NO?.replace(/^\+/, '')}
-                    onChange={(phone: string) => setFieldValue('LOGIN_MOBILE_NO', `+${phone}`)}
+                    value={values.LOGIN_MOBILE_NO?.replace(/^\+/, "")}
+                    onChange={(phone: string) =>
+                      setFieldValue("LOGIN_MOBILE_NO", `+${phone}`)
+                    }
                     inputProps={{
-                      name: 'LOGIN_MOBILE_NO',
-                      id: 'LOGIN_MOBILE_NO',
+                      name: "LOGIN_MOBILE_NO",
+                      id: "LOGIN_MOBILE_NO",
                       disabled: phoneVerified,
                     }}
-                    inputStyle={{ width: '100%' }}
+                    inputStyle={{ width: "100%" }}
                     containerStyle={{ flex: 1 }}
                   />
                 )}
-                {values[!isEmailPrimary ? 'LOGIN_EMAIL_ADDRESS' : 'LOGIN_MOBILE_NO'] &&
+                {values[
+                  !isEmailPrimary ? "LOGIN_EMAIL_ADDRESS" : "LOGIN_MOBILE_NO"
+                ] &&
                   !(isEmailPrimary ? phoneVerified : emailVerified) && (
                     <Button
                       type="button"
                       variant="secondary"
                       onClick={() => {
-                        const contact = values[!isEmailPrimary ? 'LOGIN_EMAIL_ADDRESS' : 'LOGIN_MOBILE_NO'];
+                        const contact =
+                          values[
+                            !isEmailPrimary
+                              ? "LOGIN_EMAIL_ADDRESS"
+                              : "LOGIN_MOBILE_NO"
+                          ];
                         const isEmail = !isEmailPrimary;
 
                         setOptionalVerification((prev) => ({
@@ -293,7 +350,9 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                 <div className="mt-1 text-sm text-green-600">✓ Verified</div>
               )}
               <ErrorMessage
-                name={!isEmailPrimary ? 'LOGIN_EMAIL_ADDRESS' : 'LOGIN_MOBILE_NO'}
+                name={
+                  !isEmailPrimary ? "LOGIN_EMAIL_ADDRESS" : "LOGIN_MOBILE_NO"
+                }
                 component="div"
                 className="mt-1 text-sm text-red-500"
               />
@@ -301,7 +360,10 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
 
             <div className="flex flex-col">
               <Label htmlFor="userType">Account Type</Label>
-              <Select value={values.userType} onValueChange={(val: string) => setFieldValue('userType', val)}>
+              <Select
+                value={values.userType}
+                onValueChange={(val: string) => setFieldValue("userType", val)}
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select account type" />
                 </SelectTrigger>
@@ -312,10 +374,14 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <ErrorMessage name="userType" component="div" className="mt-1 text-sm text-red-500" />
+              <ErrorMessage
+                name="userType"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
             </div>
 
-            {values.userType === 'business' && (
+            {values.userType === "business" && (
               <>
                 <div className="flex flex-col">
                   <Label htmlFor="COMPANY_NAME">Company Name</Label>
@@ -326,7 +392,11 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                     onChange={handleChange}
                     className="mt-1"
                   />
-                  <ErrorMessage name="COMPANY_NAME" component="div" className="mt-1 text-sm text-red-500" />
+                  <ErrorMessage
+                    name="COMPANY_NAME"
+                    component="div"
+                    className="mt-1 text-sm text-red-500"
+                  />
                 </div>
 
                 <div className="flex flex-col">
@@ -338,7 +408,11 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                     onChange={handleChange}
                     className="mt-1"
                   />
-                  <ErrorMessage name="GST_VAT_NO" component="div" className="mt-1 text-sm text-red-500" />
+                  <ErrorMessage
+                    name="GST_VAT_NO"
+                    component="div"
+                    className="mt-1 text-sm text-red-500"
+                  />
                 </div>
               </>
             )}
@@ -352,7 +426,11 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                 onChange={handleChange}
                 className="mt-1"
               />
-              <ErrorMessage name="FULL_ADDRESS" component="div" className="mt-1 text-sm text-red-500" />
+              <ErrorMessage
+                name="FULL_ADDRESS"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
             </div>
 
             <div className="flex flex-col">
@@ -364,7 +442,11 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                 onChange={handleChange}
                 className="mt-1"
               />
-              <ErrorMessage name="CITY" component="div" className="mt-1 text-sm text-red-500" />
+              <ErrorMessage
+                name="CITY"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
             </div>
 
             <div className="flex flex-col">
@@ -376,7 +458,11 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                 onChange={handleChange}
                 className="mt-1"
               />
-              <ErrorMessage name="STATE_NAME" component="div" className="mt-1 text-sm text-red-500" />
+              <ErrorMessage
+                name="STATE_NAME"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
             </div>
 
             <div className="flex flex-col">
@@ -388,7 +474,11 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                 onChange={handleChange}
                 className="mt-1"
               />
-              <ErrorMessage name="COUNTRY" component="div" className="mt-1 text-sm text-red-500" />
+              <ErrorMessage
+                name="COUNTRY"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
             </div>
 
             <div className="flex flex-col">
@@ -400,7 +490,11 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                 onChange={handleChange}
                 className="mt-1"
               />
-              <ErrorMessage name="PIN_CODE" component="div" className="mt-1 text-sm text-red-500" />
+              <ErrorMessage
+                name="PIN_CODE"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
             </div>
 
             <div className="flex flex-col">
@@ -409,7 +503,7 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                 <Input
                   id="LOGIN_PASSWORD"
                   name="LOGIN_PASSWORD"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={values.LOGIN_PASSWORD}
                   onChange={handleChange}
                 />
@@ -418,10 +512,18 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
-              <ErrorMessage name="LOGIN_PASSWORD" component="div" className="mt-1 text-sm text-red-500" />
+              <ErrorMessage
+                name="LOGIN_PASSWORD"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
             </div>
 
             <div className="flex flex-col">
@@ -429,38 +531,60 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 value={values.confirmPassword}
                 onChange={handleChange}
                 className="mt-1"
               />
-              <ErrorMessage name="confirmPassword" component="div" className="mt-1 text-sm text-red-500" />
+              <ErrorMessage
+                name="confirmPassword"
+                component="div"
+                className="mt-1 text-sm text-red-500"
+              />
             </div>
 
             <div className="flex items-start gap-2 pt-4">
-              <Field type="checkbox" id="acknowledged" name="acknowledged" className="mt-1 h-4 w-4" />
-              <label htmlFor="acknowledged" className="text-sm text-muted-foreground">
-                I agree to the{' '}
+              <Field
+                type="checkbox"
+                id="acknowledged"
+                name="acknowledged"
+                className="mt-1 h-4 w-4"
+              />
+              <label
+                htmlFor="acknowledged"
+                className="text-sm text-muted-foreground"
+              >
+                I agree to the{" "}
                 <Link to="#" className="text-blue-600 hover:underline">
                   Terms of Service
-                </Link>{' '}
-                and{' '}
+                </Link>{" "}
+                and{" "}
                 <Link to="#" className="text-blue-600 hover:underline">
                   Privacy Policy
                 </Link>
               </label>
             </div>
-            <ErrorMessage name="acknowledged" component="div" className="text-sm text-red-500" />
+            <ErrorMessage
+              name="acknowledged"
+              component="div"
+              className="text-sm text-red-500"
+            />
 
             <OptionalVerificationModal
               contactInfo={optionalVerification.contact}
               isEmail={optionalVerification.isEmail}
               open={optionalVerification.open}
-              onOpenChange={(open: boolean) => setOptionalVerification((prev) => ({ ...prev, open }))}
+              onOpenChange={(open: boolean) =>
+                setOptionalVerification((prev) => ({ ...prev, open }))
+              }
               otp={optionalVerification.otp}
-              setOtp={(otp: string) => setOptionalVerification((prev) => ({ ...prev, otp }))}
+              setOtp={(otp: string) =>
+                setOptionalVerification((prev) => ({ ...prev, otp }))
+              }
               otpTimer={optionalVerification.otpTimer}
-              onResend={() => handleOptionalVerification(optionalVerification.contact)}
+              onResend={() =>
+                handleOptionalVerification(optionalVerification.contact)
+              }
               onVerify={verifyOptionalOtp}
               loading={optionalVerification.loading}
               error={optionalVerification.error}
@@ -475,7 +599,7 @@ export const SignUpStep3: React.FC<SignUpStep3Props> = ({
                   Creating Account...
                 </>
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </Button>
           </div>
