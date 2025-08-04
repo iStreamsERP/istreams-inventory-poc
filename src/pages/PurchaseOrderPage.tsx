@@ -1,26 +1,78 @@
-import React, { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Barcode,
   Building,
-  Calendar,
-  FileText,
   Laptop,
-  Mail,
-  MapPin,
   Package,
   TrashIcon,
   Type,
-  User,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState, type JSX } from "react";
 import { OrderTracking } from "@/components/OrderTracking"; // Added missing import
 import { PopoverTable } from "@/components/PopoverTable"; // Added missing import
 import { FormCard } from "@/components/FormCard";
 
+// Define interfaces for data structures
+interface Material {
+  ITEM_CODE: string;
+  ITEM_NAME: string;
+  UOM: string;
+  UOM_STOCK: string;
+  SUB_MATERIAL_NO: string;
+  CATEGORY: string;
+  SUPPLIER: string;
+  quantity?: number;
+}
+
+interface StatusItem {
+  key: string;
+  icon: string;
+  title: string;
+  date: string;
+  time: string;
+  content: JSX.Element; // Changed from unknown to JSX.Element for better type safety
+}
+
+interface OrderTrackingData {
+  orderNumber: string;
+  customerName: string;
+  statusItems: StatusItem[];
+}
+
+interface RfqDetails {
+  rfqNumber: string;
+  supplier: string;
+  dueDate: string;
+  description: string;
+}
+
+interface Field {
+  id: string;
+  label: string;
+  value: string;
+  icon: JSX.Element; // Changed from unknown to JSX.Element for better type safety
+  rows?: number;
+}
+
+interface Column {
+  key: string;
+  header: string;
+  width: string;
+  align: string;
+  render?: (
+    item: Material,
+    index: number,
+    editingQuantityId: string | null,
+    setEditingQuantityId: (id: string | null) => void,
+    handleRemoveMaterial: (itemCode: string, event: React.MouseEvent) => void,
+    handleQuantityChange?: (itemCode: string, quantity: string) => void
+  ) => JSX.Element; // Changed from unknown to JSX.Element
+}
+
 // Static available materials data
-const staticAvailableMaterials = [
+const staticAvailableMaterials: Material[] = [
   {
     ITEM_CODE: "MTL001",
     ITEM_NAME: "Steel Pipe 6 inch",
@@ -96,7 +148,7 @@ const staticAvailableMaterials = [
 ];
 
 // Static data for OrderTracking
-const staticOrderTrackingData = {
+const staticOrderTrackingData: OrderTrackingData = {
   orderNumber: "ORD-12345",
   customerName: "John Doe",
   statusItems: [
@@ -199,7 +251,7 @@ const staticOrderTrackingData = {
 };
 
 // Column configuration for the table
-const rfqColumns = [
+const rfqColumns: Column[] = [
   {
     key: "index",
     header: "S.No.",
@@ -244,10 +296,10 @@ const rfqColumns = [
             type="number"
             value={item.quantity || 0}
             onChange={(e) =>
-              handleQuantityChange(item.ITEM_CODE, e.target.value)
+              handleQuantityChange?.(item.ITEM_CODE, e.target.value)
             }
             onBlur={() => setEditingQuantityId(null)}
-            onKeyDown={(e) => {
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === "Enter") {
                 setEditingQuantityId(null);
               }
@@ -289,7 +341,9 @@ const rfqColumns = [
       <Button
         variant="ghost"
         size="sm"
-        onClick={(e) => handleRemoveMaterial(item.ITEM_CODE, e)}
+        onClick={(e: React.MouseEvent) =>
+          handleRemoveMaterial(item.ITEM_CODE, e)
+        }
         className="h-6 w-6 p-0 rounded-full hover:bg-red-100 hover:text-red-600"
       >
         <TrashIcon className="h-3 w-3 text-red-500" />
@@ -298,7 +352,7 @@ const rfqColumns = [
   },
 ];
 
-const fields = [
+const fields: Field[] = [
   {
     id: "code",
     label: "Item Code",
@@ -326,33 +380,29 @@ const fields = [
   {
     id: "brand",
     label: "Brand",
-    value: "Lenovo  ",
+    value: "Lenovo",
     icon: <Building className="h-4 w-4" />,
     rows: 4,
   },
 ];
 
 // RFQ Component
-export const MaterialMaster = () => {
-  const [selectedMaterials, setSelectedMaterials] = useState([]);
-  const [availableMaterials, setAvailableMaterials] = useState(
+export const PurchaseOrderPage: React.FC = () => {
+  const [selectedMaterials, setSelectedMaterials] = useState<Material[]>([]);
+  const [availableMaterials, setAvailableMaterials] = useState<Material[]>(
     staticAvailableMaterials
   );
-  const [loading, setLoading] = useState(false);
-  const [rfqDetails, setRfqDetails] = useState({
-    rfqNumber: "",
-    supplier: "",
-    dueDate: "",
-    description: "",
-  });
-  const [editingQuantityId, setEditingQuantityId] = useState(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [editingQuantityId, setEditingQuantityId] = useState<string | null>(
+    null
+  );
 
   // Simulate dynamic data fetching
   useEffect(() => {
     fetchMaterials();
   }, []);
 
-  const fetchMaterials = async () => {
+  const fetchMaterials = async (): Promise<void> => {
     setLoading(true);
     try {
       // Replace this with actual API call in production
@@ -366,8 +416,8 @@ export const MaterialMaster = () => {
   };
 
   // Handle material selection
-  const handleMaterialSelect = (material) => {
-    const materialWithQuantity = {
+  const handleMaterialSelect = (material: Material): void => {
+    const materialWithQuantity: Material = {
       ...material,
       quantity: 1,
     };
@@ -384,47 +434,21 @@ export const MaterialMaster = () => {
   };
 
   // Handle quantity change
-  const handleQuantityChange = (itemCode, quantity) => {
+  const handleQuantityChange = (itemCode: string, quantity: string): void => {
     setSelectedMaterials((prev) =>
       prev.map((material) =>
         material.ITEM_CODE === itemCode
-          ? { ...material, quantity: Math.max(0, quantity) }
+          ? { ...material, quantity: Math.max(0, Number(quantity)) }
           : material
       )
     );
   };
 
   // Handle material removal
-  const handleRemoveMaterial = (itemCode) => {
+  const handleRemoveMaterial = (itemCode: string): void => {
     setSelectedMaterials((prev) =>
       prev.filter((material) => material.ITEM_CODE !== itemCode)
     );
-  };
-
-  // Handle RFQ form submission
-  const handleSubmitRfq = () => {
-    if (selectedMaterials.length === 0) {
-      alert("Please select at least one material for the RFQ");
-      return;
-    }
-
-    const rfqData = {
-      ...rfqDetails,
-      materials: selectedMaterials,
-      totalItems: selectedMaterials.length,
-      createdAt: new Date().toISOString(),
-    };
-
-    console.log("RFQ Data:", rfqData);
-    alert("RFQ submitted successfully! Check console for details.");
-  };
-
-  // Handle input changes for RFQ details
-  const handleInputChange = (field, value) => {
-    setRfqDetails((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
   };
 
   return (
@@ -466,6 +490,8 @@ export const MaterialMaster = () => {
             emptyMessage="No materials selected. Please select materials to add to your RFQ."
             className="h-full"
             popoverWidth="900px"
+            editingQuantityId={editingQuantityId}
+            setEditingQuantityId={setEditingQuantityId}
           />
         </div>
       </div>
@@ -484,4 +510,4 @@ export const MaterialMaster = () => {
   );
 };
 
-export default MaterialMaster;
+export default PurchaseOrderPage;

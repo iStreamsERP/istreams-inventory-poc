@@ -6,6 +6,7 @@ export { DashboardPage } from "./DashboardPage";
 export { MaterialMaster } from "./MaterialMaster";
 export { MaterialRequisition } from "./MaterialRequisition";
 export { MaterialIssueNote } from "./MaterialIssueNote";
+export { PurchaseOrderPage } from "./PurchaseOrderPage";
 export { RfqPage } from "./RfqPage";
 
 export { NotFoundPage } from "./NotFoundPage";

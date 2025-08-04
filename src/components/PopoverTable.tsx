@@ -26,7 +26,54 @@ import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, PackageSearch } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const PopoverTable = ({
+// Define interfaces for data and props
+interface DataItem {
+  [key: string]: any; // Flexible to accommodate dynamic keys
+  ITEM_NAME: string;
+  SUB_ITEM_NO?: string;
+  UOM_STOCK?: string;
+  SUM_MATERIAL_NO?: string;
+}
+
+interface Column {
+  key: string;
+  header: string;
+  width: string;
+  align: "left" | "center" | "right";
+  render?: (
+    item: DataItem,
+    index: number,
+    editingItemId: string | null,
+    setEditingItemId: (id: string | null) => void,
+    handleDeleteData: (itemCode: string, event: React.MouseEvent) => void,
+    handleEditData?: (itemCode: string, quantity: string) => void
+  ) => JSX.Element;
+}
+
+interface UserData {
+  userName: string;
+  clientURL: string;
+}
+
+interface PopoverTableProps {
+  data: DataItem[];
+  onSelectData: (data: DataItem) => void;
+  onEditData: (itemCode: string, quantity: string) => void;
+  onDeleteData: (itemCode: string) => void;
+  columns: Column[];
+  searchFields: string[];
+  uniqueKey: string;
+  placeholderText: string;
+  emptyMessage: string;
+  popoverWidth: string;
+  dataModelName?: string;
+  dataModelType?: string;
+  wherecondition?: string;
+  orderby?: string;
+}
+
+// PopoverTable Component
+export const PopoverTable: React.FC<PopoverTableProps> = ({
   data,
   onSelectData,
   onEditData,
@@ -42,41 +89,45 @@ const PopoverTable = ({
   wherecondition,
   orderby,
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [editingItemId, setEditingItemId] = useState(null);
-  const [selectedData, setSelectedData] = useState(data);
-  const [availableData, setAvailableData] = useState([]);
-  const [isFetching, setIsFetching] = useState(false);
-  const { userData } = useAuth();
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [selectedData, setSelectedData] = useState<DataItem[]>(data);
+  const [availableData, setAvailableData] = useState<DataItem[]>([]);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const { userData } = useAuth() as { userData: UserData | null };
 
+  // Sync selectedData with prop changes
   useEffect(() => {
     setSelectedData(data);
   }, [data]);
 
+  // Fetch data when userData is available
   useEffect(() => {
     if (userData?.userName && userData?.clientURL) {
       fetchData();
     }
   }, [userData]);
 
+  // Reset search query when popover opens/closes
   useEffect(() => {
     if (isPopoverOpen) {
       setSearchQuery("");
     }
   }, [isPopoverOpen]);
 
-  const fetchData = async () => {
+  // Fetch data from SOAP service
+  const fetchData = async (): Promise<void> => {
     setIsFetching(true);
     try {
       const payload = {
-        UserName: userData.userName,
+        UserName: userData!.userName,
         DataModelName: dataModelName,
         WhereCondition: wherecondition,
         Orderby: orderby,
       };
-      const response = await callSoapService(userData.clientURL, dataModelType, payload);
-      setAvailableData(response || []);
+      const response = await callSoapService(userData!.clientURL, dataModelType, payload);
+      setAvailableData((response as DataItem[]) || []);
     } catch (error) {
       console.error("Failed to fetch data:", error);
       setAvailableData([]);
@@ -85,25 +136,30 @@ const PopoverTable = ({
     }
   };
 
-  const handleDataSelect = (data) => {
+  // Handle data selection
+  const handleDataSelect = (data: DataItem): void => {
     setIsPopoverOpen(false);
     setSearchQuery("");
     onSelectData(data);
   };
 
-  const handleEditData = (itemCode, quantity) => {
+  // Handle data edit
+  const handleEditData = (itemCode: string, quantity: string): void => {
     onEditData(itemCode, quantity);
   };
 
-  const handleDeleteData = (itemCode, event) => {
+  // Handle data deletion
+  const handleDeleteData = (itemCode: string, event: React.MouseEvent): void => {
     event.stopPropagation();
     onDeleteData(itemCode);
   };
 
-  const isDataSelected = (data) =>
+  // Check if data is already selected
+  const isDataSelected = (data: DataItem): boolean =>
     selectedData.some(
       (d) =>
-        d[uniqueKey] === data[uniqueKey] && d.SUB_ITEM_NO === data.SUB_ITEM_NO
+        d[uniqueKey] === data[uniqueKey] &&
+        d.SUB_ITEM_NO === data.SUB_ITEM_NO
     );
 
   return (
@@ -116,13 +172,17 @@ const PopoverTable = ({
             className="h-8 w-full justify-between bg-white text-xs dark:bg-slate-950"
             disabled={isFetching}
           >
-            {isFetching
-              ? "Loading data..."
-              : selectedData?.length > 0
-              ? `${selectedData[0][uniqueKey]} - ${selectedData[0].ITEM_NAME}${
-                  selectedData[0].SUB_ITEM_NO ? ` - ${selectedData[0].SUB_ITEM_NO}` : ""
-                }`
-              : placeholderText}
+            {isFetching ? (
+              "Loading data..."
+            ) : selectedData?.length > 0 ? (
+              `${selectedData[0][uniqueKey]} - ${selectedData[0].ITEM_NAME}${
+                selectedData[0].SUB_ITEM_NO
+                  ? ` - ${selectedData[0].SUB_ITEM_NO}`
+                  : ""
+              }`
+            ) : (
+              placeholderText
+            )}
             <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -204,7 +264,11 @@ const PopoverTable = ({
                   key={col.key}
                   className={cn(
                     "px-2 py-1",
-                    col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : ""
+                    col.align === "right"
+                      ? "text-right"
+                      : col.align === "center"
+                      ? "text-center"
+                      : ""
                   )}
                   style={{ width: col.width }}
                 >
@@ -225,7 +289,11 @@ const PopoverTable = ({
                       key={col.key}
                       className={cn(
                         "px-2 py-1",
-                        col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : ""
+                        col.align === "right"
+                          ? "text-right"
+                          : col.align === "center"
+                          ? "text-center"
+                          : ""
                       )}
                     >
                       {col.key === "index"
@@ -261,5 +329,3 @@ const PopoverTable = ({
     </div>
   );
 };
-
-export default PopoverTable;

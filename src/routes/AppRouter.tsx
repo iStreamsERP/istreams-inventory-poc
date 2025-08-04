@@ -7,6 +7,7 @@ import {
   MaterialMaster,
   MaterialRequisition,
   NotFoundPage,
+  PurchaseOrderPage,
   RfqPage,
   SignUpPage,
 } from "@/pages";
@@ -37,7 +38,8 @@ const router = createBrowserRouter([
           { path: "/material-master", element: <MaterialMaster /> },
           { path: "/material-requisition", element: <MaterialRequisition /> },
           { path: "/material-issue-note", element: <MaterialIssueNote /> },
-          { path: "/fqPage", element: <RfqPage /> },
+          { path: "/purchase-order", element: <PurchaseOrderPage /> },
+          { path: "/rfq-rate-viewer", element: <RfqPage /> },
         ],
       },
     ],

@@ -1,30 +1,60 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 
-const OrderTracking = ({ 
+// Define interfaces for props and theme classes
+interface StatusItem {
+  key: string;
+  icon: string;
+  title: string;
+  date: string;
+  time?: string;
+  content: ReactNode;
+}
+
+interface ThemeClasses {
+  background: string;
+  border: string;
+  text: string;
+  card: string;
+}
+
+interface OrderTrackingProps {
+  orderNumber?: string;
+  customerName?: string;
+  statusItems?: StatusItem[];
+  className?: string;
+  theme?: "light" | "dark";
+  showConnectorLines?: boolean;
+  defaultOpenSection?: string | null;
+}
+
+// OrderTracking Component
+export const OrderTracking: React.FC<OrderTrackingProps> = ({
   orderNumber,
-  customerName,
   statusItems = [],
   className = "",
   theme = "light",
   showConnectorLines = true,
-  defaultOpenSection = null
+  defaultOpenSection = null,
 }) => {
-  const [openSections, setOpenSections] = useState(
+  // State for open sections
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
     statusItems.reduce((acc, item) => {
       acc[item.key] = defaultOpenSection === item.key;
       return acc;
-    }, {})
+    }, {} as Record<string, boolean>)
   );
 
-  const toggleSection = (section) => {
+  // Toggle section open/close
+  const toggleSection = (section: string): void => {
     setOpenSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
   };
 
-  const themeClasses = {
+  // Theme classes
+  const themeClasses: Record<string, ThemeClasses> = {
     light: {
       background: "bg-white",
       border: "border-gray-200",
@@ -40,12 +70,14 @@ const OrderTracking = ({
   };
 
   return (
-    <div className={`h-full overflow-y-auto rounded-lg shadow-sm border ${themeClasses[theme].border} ${themeClasses[theme].background} space-y-2 p-2 ${className}`}>
+    <div
+      className={`h-full overflow-y-auto rounded-lg shadow-sm border ${themeClasses[theme].border} ${themeClasses[theme].background} space-y-2 p-2 ${className}`}
+    >
       <div className="pb-2 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center rounded-t-lg">
         <h2 className="text-sm font-semibold">Order Tracking</h2>
         {orderNumber && (
           <Badge
-            variant={"secondary"}
+            variant="secondary"
             className="text-green-600 bg-green-100 text-xs font-medium"
           >
             {orderNumber}
@@ -82,7 +114,9 @@ const OrderTracking = ({
                     </span>
                   </div>
                   {openSections[item.key] && (
-                    <div className={`mt-1 ${themeClasses[theme].card} rounded-lg`}>
+                    <div
+                      className={`mt-1 ${themeClasses[theme].card} rounded-lg`}
+                    >
                       {item.content}
                     </div>
                   )}
@@ -95,5 +129,3 @@ const OrderTracking = ({
     </div>
   );
 };
-
-export default OrderTracking;

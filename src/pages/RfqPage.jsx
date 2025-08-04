@@ -1,10 +1,11 @@
 import { useState } from "react";
-import PopoverTable from "@/components/PopoverTable";
-import SupplierSelection from "@/components/SupplierSelection";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import OrderTracking from "@/components//OrderTracking";
+import { OrderTracking } from "@/components/OrderTracking"; // Added missing import
+import { PopoverTable } from "@/components/PopoverTable"; // Added missing import
+import { FormCard } from "@/components/FormCard";
+import { SupplierSelection } from "@/components/SupplierSelection";
 
 export const RfqPage = () => {
   const [materials, setMaterials] = useState([]);

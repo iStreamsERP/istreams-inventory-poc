@@ -47,6 +47,11 @@ export const getNavbarLinks = (isAdmin) => [
             icon: "Home",
             path: "/material-issue-note",
           },
+          {
+            label: "Purchase Order",
+            icon: "Home",
+            path: "/purchase-order",
+          },
         ],
       },
       {
@@ -56,7 +61,7 @@ export const getNavbarLinks = (isAdmin) => [
           {
             label: "RFQ Rate Viewer",
             icon: "Home",
-            path: "/material-master",
+            path: "/rfq-rate-viewer",
           },
           {
             label: "RFQ List",
