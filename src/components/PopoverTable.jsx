@@ -118,7 +118,7 @@ const PopoverTable = ({
           >
             {isFetching
               ? "Loading data..."
-              : selectedData.length > 0
+              : selectedData?.length > 0
               ? `${selectedData[0][uniqueKey]} - ${selectedData[0].ITEM_NAME}${
                   selectedData[0].SUB_ITEM_NO ? ` - ${selectedData[0].SUB_ITEM_NO}` : ""
                 }`
@@ -214,7 +214,7 @@ const PopoverTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {selectedData.length > 0 ? (
+            {selectedData?.length > 0 ? (
               selectedData.map((item, index) => (
                 <TableRow
                   key={`${item[uniqueKey]}-${item.SUB_ITEM_NO || "0"}-${index}`}
